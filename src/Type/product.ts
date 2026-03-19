@@ -7,8 +7,10 @@
   review: string;
   rating: number
   productAvailability?: boolean;
-  category: "Fruits" | "Fashion" | "Grocery" | "Electronics" | "Shoe" | "Beauty";
-  group?: string,
+  category: {
+    id:number;
+    name:string;
+  };
   type: string;
   details?: Record<string, string>;
   season?: "Summer" | "Winter" | "Winter-Spring" | "Summer-Early-Autumn"
