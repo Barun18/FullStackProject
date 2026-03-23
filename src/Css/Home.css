@@ -1,0 +1,7 @@
+.card{
+background-color: rgb(30, 25, 35);
+display: grid;
+grid-template-columns: repeat(5, 1fr);
+gap: 16px;
+}
+

@@ -1,0 +1,15 @@
+node_modules
+dist
+.env
+package.json
+package-lock.json
+
+server/node_modules
+server/.env
+server/package.json
+server/package-lock.json
+server/generated/prisma
+tsconfig.app.json
+tsconfig.json
+tsconfig.node.json
+vite.config.ts
