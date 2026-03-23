@@ -1,5 +1,6 @@
 node_modules
 dist
+<<<<<<< HEAD
 .env
 package.json
 package-lock.json
@@ -13,3 +14,6 @@ tsconfig.app.json
 tsconfig.json
 tsconfig.node.json
 vite.config.ts
+=======
+.env
+>>>>>>> 0b257a29eeaa3db8b4d0d82054303be09246ac0c

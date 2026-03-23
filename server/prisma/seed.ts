@@ -18,14 +18,20 @@ async function main(){
     // for (let category of categories ){
     //     await prisma.category.create({
     //         data: category,
+<<<<<<< HEAD
     //         skipDuplicates: true,
+=======
+>>>>>>> 0b257a29eeaa3db8b4d0d82054303be09246ac0c
     //     });
     // }
     
     // for (let product of products ){
     //     await prisma.product.create({
     //         data: product,
+<<<<<<< HEAD
     //         skipDuplicates: true,
+=======
+>>>>>>> 0b257a29eeaa3db8b4d0d82054303be09246ac0c
     //     });
     // }
 }
