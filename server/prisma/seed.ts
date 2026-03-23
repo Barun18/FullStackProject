@@ -15,17 +15,17 @@ const prisma = new PrismaClient({
 
 async function main(){
         
-    for (let category of categories ){
-        await prisma.category.create({
-            data: category,
-        });
-    }
+    // for (let category of categories ){
+    //     await prisma.category.create({
+    //         data: category,
+    //     });
+    // }
     
-    for (let product of products ){
-        await prisma.product.create({
-            data: product,
-        });
-    }
+    // for (let product of products ){
+    //     await prisma.product.create({
+    //         data: product,
+    //     });
+    // }
 }
     main().catch((e) => {
         console.error(e);

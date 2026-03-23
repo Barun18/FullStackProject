@@ -2,11 +2,11 @@ import { useParams } from "react-router-dom";
 import { getSingleProduct } from '../services/Api';
 import useCartStore from "../store/useCartStore";
 import useReviewStore from "../store/reviewStore";
-import "../Css/ProductAbout.css"
+import "../Css/ProductDetails.css"
 import { useEffect, useState } from "react";
 
 
-function ProductAbout() {
+function ProductDetails() {
 
   const { id } = useParams();
    const [item, setItem] = useState<any>(null)
@@ -18,6 +18,7 @@ function ProductAbout() {
     }
     fetchProduct();
   },[id])
+  
 const addToCart = useCartStore((state) => state.addToCart)
 
   // const cartItem = item.find((i) => i.id.toString() === id)
@@ -77,7 +78,7 @@ if(!item) return <div>Loading...</div>
           </button>
 
         </div>
-        <div className="product-About">
+        <div className="product-details">
           Highlight
           <table className="w-full border border-gray-400">
             <tbody>
@@ -174,4 +175,4 @@ if(!item) return <div>Loading...</div>
 
 }
 
-export default ProductAbout;
+export default ProductDetails;

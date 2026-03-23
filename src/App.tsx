@@ -4,7 +4,7 @@ import Home from './Pages/Home'
 import Cart from './Pages/Cart';
 import AddProduct from'./Pages/AddProduct';
 import AdminPage from './Pages/AdminPage';
-import ProductAbout from './Pages/ProductAbout';
+import ProductAbout from './Pages/ProductDetails';
 import GroupProduct from './Pages/groupProduct';
 import { Routes ,Route} from 'react-router-dom';
 import SearchProduct from './Pages/searchproduct';
