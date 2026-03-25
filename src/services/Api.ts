@@ -22,7 +22,7 @@ export async function getSingleProduct(id: string){
       throw new Error("Failed to fetch product");
     }
     return res.json();
-<<<<<<< HEAD
+
 }
 
 //TODO:-- api call to submit user's registration data into server
@@ -38,6 +38,6 @@ export async function getSingleProduct(id: string){
 
 //   return res.json();
 // }
-=======
-}
->>>>>>> 0b257a29eeaa3db8b4d0d82054303be09246ac0c
+
+
+

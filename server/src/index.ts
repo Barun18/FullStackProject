@@ -4,7 +4,7 @@ import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 import productRoutes from "./routes/product.routes.js";
-app.use(express.urlencoded({ extended:true }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 import bcrypt from "bcrypt";
@@ -16,11 +16,13 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+// app.set("view engine", "ejs");
+// app.set("views", path.join(__dirname, "views"));
 
-
-app.use(express.json());
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}));
 
 app.get("/products", async (req, res) => {
   const products = await prisma.product.findMany({
@@ -52,69 +54,71 @@ app.get("/products/:id", async (req, res) => {
 //     res.send("working");
 // })
 app.get("/register", function (req, res) {
-    // res.render("register");
-    res.json({message: "Register endpoint ready" });
+  // res.render("register");
+  res.json({ message: "Register endpoint ready" });
 })
 
-app.post("/register", (req, res) => {
-    try {
-        let { username, email, password, age } = req.body;
+app.post("/register", async (req, res) => {
+  try {
+    let { username, email, password, age } = req.body;
 
-        bcrypt.genSalt(10, (err, salt) => {
-            bcrypt.hash(password, salt, async (err, hash) => {
-                await prisma.user.create({
-                    data: {
-                        username,
-                        email,
-                        password: hash,
-                        age: Number(age)
-                    },
-                });
-            })
-            const token = jwt.sign({ email }, "mysecretKey");
-            res.cookie("token", token, { httpOnly: true });
-            res.json({message: "Your accoount is created"});
-        })
-    } catch (err) {
-        console.log(err);
-        res.status(500).send("something went wrong");
-    }
+    // bcrypt.genSalt(10, (err, salt) => {
+    //     bcrypt.hash(password, salt, async (err, hash) => {
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+    await prisma.user.create({
+      data: {
+        username,
+        email,
+        password: hash,
+        age: Number(age)
+      },
+    });
+
+    const token = jwt.sign({ email }, "mysecretKey");
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false
+    });
+    res.json({ message: "Your accoount is created" });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("something went wrong");
+  }
 })
 
 // app.get("/login", (req, res) => {
 //     res.render("login");
 // })
 app.post("/signin", async (req, res) => {
-    const user = await prisma.user.findUnique({
-        where: {
-            email: req.body.email
-        },
-    })
-    if (!user){
-       return res.status(400).json( { error: "Something went wrong"} );
-      }
-    bcrypt.compare(req.body.password, user.password, (err, result) => {
-        if (result) {
-            const token = jwt.sign({ email: user.email }, "mysecretKey");
-            res.cookie("token", token,{ httpOnly: true });
-            res.status(200).json({ message: "You logged in" } );
-        }
-        else res.status(400).json({ message: "Something went wrong" } );
-    });
+  const user = await prisma.user.findUnique({
+    where: {
+      email: req.body.email
+    },
+  })
+  if (!user) {
+    return res.status(400).json({ error: "Something went wrong" });
+  }
+  bcrypt.compare(req.body.password, user.password, (err, result) => {
+    if (result) {
+      const token = jwt.sign({ email: user.email }, "mysecretKey");
+      res.cookie("token", token, { httpOnly: true });
+      res.status(200).json({ message: "You logged in" });
+    }
+    else res.status(400).json({ message: "Something went wrong" });
+  });
 })
 
 
-app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true
-}));
 app.get("/logout", (req, res) => {
-    res.clearCookie("token", {
-        httpOnly: true,
-        sameSite: "strict"
-    });
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "strict"
+  });
 
-    res.json({ message: "Logout successful" });
+  res.json({ message: "Logout successful" });
 });
 
 

@@ -7,11 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-<<<<<<< HEAD
 
-
-=======
->>>>>>> 0b257a29eeaa3db8b4d0d82054303be09246ac0c
 model Product {
   id      Int    @id @default(autoincrement())
   price   Float
@@ -29,7 +25,6 @@ model Category {
    name String @unique
    products Product[]
 }
-<<<<<<< HEAD
 
 model User{
   id Int @id @default(autoincrement())
@@ -38,5 +33,4 @@ model User{
   password String
   age Int
 }
-=======
->>>>>>> 0b257a29eeaa3db8b4d0d82054303be09246ac0c
+

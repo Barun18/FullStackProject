@@ -22,29 +22,37 @@ function CreatedAccount() {
                 headers: {
                     "Content-Type": "application/json",
                 },
+                credentials: "include",
                 body: JSON.stringify(form),
             });
 
-            const data = await res.json();
-
-            console.log(data);
-            alert("Account created successfully!");
+            let data;
+            try {
+                data = await res.json(); // inner try
+            } catch {
+                data = {};
+            }
+            if (res.ok) {
+                alert("Account Created Successfully.")
+            } else {
+                alert(data.error || "Something went wrong!");
+            }
 
         } catch (err) {
             console.error(err);
-            alert("Something went wrong");
+            alert("Something went wrong!");
         }
     };
 
 
     return (
-        <div>
+        <div className="pt-10 pl-3.5 bg-black">
             <form onSubmit={handleSubmit}>
-                <input name="username" onChange={handleChange} placeholder="username" />
+                <input className="border-b-amber-200" name="username" onChange={handleChange} placeholder="username" />
                 <input name="email" onChange={handleChange} placeholder="user email" />
-                <input name="password"onChange={handleChange}  placeholder="password" />
+                <input name="password" onChange={handleChange} placeholder="password" />
                 <input name="age" onChange={handleChange} placeholder="age" />
-                <button type="submit">Sign Up</button>
+                <button className="bg-blue-700" type="submit">Sign Up</button>
             </form>
         </div>
     )
