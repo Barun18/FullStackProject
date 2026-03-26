@@ -89,9 +89,6 @@ app.post("/register", async (req, res) => {
   }
 })
 
-// app.get("/login", (req, res) => {
-//     res.render("login");
-// })
 app.post("/signin", async (req, res) => {
   const user = await prisma.user.findUnique({
     where: {
@@ -101,14 +98,14 @@ app.post("/signin", async (req, res) => {
   if (!user) {
     return res.status(400).json({ error: "Something went wrong" });
   }
-  bcrypt.compare(req.body.password, user.password, (err, result) => {
+  const result = await bcrypt.compare(req.body.password, user.password);
     if (result) {
       const token = jwt.sign({ email: user.email }, "mysecretKey");
       res.cookie("token", token, { httpOnly: true });
       res.status(200).json({ message: "You logged in" });
     }
     else res.status(400).json({ message: "Something went wrong" });
-  });
+  
 })
 
 
@@ -127,3 +124,83 @@ app.listen(5000, () => {
   console.log("Server running on port 5000");
 });
 
+
+
+//TODO:-- request for adding cart item into cartItem
+app.post("/cart/add", async (req, res) => {
+  
+  const { userId, productId } = req.body;
+
+  try {
+    // 1. Find or create cart
+    let cart = await prisma.cart.findUnique({
+      where: { userId },
+    });
+
+    if (!cart) {
+      cart = await prisma.cart.create({
+        data: { userId },
+      });
+    }
+
+    // 2. Check if item already exists
+    const existingItem = await prisma.cartItem.findUnique({
+      where: {
+        cartId_productId: {
+          cartId: cart.id,
+          productId,
+        },
+      },
+    });
+
+    // 3. If exists → increase quantity
+    if (existingItem) {
+      const updated = await prisma.cartItem.update({
+        where: {
+          cartId_productId: {
+            cartId: cart.id,
+            productId,
+          },
+        },
+        data: {
+          quantity: existingItem.quantity + 1,
+        },
+      });
+
+      return res.json(updated);
+    }
+
+    // 4. Else → create new item
+    const newItem = await prisma.cartItem.create({
+      data: {
+        cartId: cart.id,
+        productId,
+        quantity: 1,
+      },
+    });
+
+    res.json(newItem);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error adding to cart" });
+  }
+});
+
+
+//TODO:-- get cart with Product details
+app.get("/cart/:userId", async (req, res) => {
+  const userId = Number(req.params.userId);
+
+  const cart = await prisma.cart.findUnique({
+    where: { userId },
+    include: {
+      items: {
+        include: {
+          product: true,
+        },
+      },
+    },
+  });
+
+  res.json(cart?.items || []);
+});

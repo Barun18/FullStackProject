@@ -71,7 +71,20 @@ function Home() {
     };
 
     const cartItems = products.filter(p => cart[p.id]);
-    
+    const [totalQty, setTotalQty] = useState(0);
+
+    const fetchCartCount = async () => {
+        const res = await fetch("http://localhost:5000/cart/1");
+        const data = await res.json();
+
+        const total = data.reduce(
+            (sum: number, item: any) => sum + item.quantity,
+            0
+        );
+
+        setTotalQty(total);
+    };
+
     return (
         <div>
             <CartItem items={cartItems} cart={cart} />
@@ -104,6 +117,7 @@ function Home() {
                         onAdd={handleAdd}
                         onIncrease={handleIncrease}
                         onDecrease={handleDecrease}
+                        onCartUpdate={fetchCartCount}
                     />
                 ))}
 

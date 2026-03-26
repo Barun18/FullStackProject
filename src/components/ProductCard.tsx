@@ -1,5 +1,4 @@
 
-import { Link } from "react-router-dom";
 import { FaStar } from "react-icons/fa";
 import type { Product } from '../Type/Product'
 
@@ -9,19 +8,32 @@ type Props = {
   onAdd: (product: Product) => void;
   onIncrease: (id: number) => void;
   onDecrease: (id: number) => void;
+  onCartUpdate: () => void;
 }
 
 function ProductCard({
   product,
   cartQty,
-  onAdd,
   onIncrease,
-  onDecrease }: Props) {
+  onDecrease,
+  onCartUpdate,
+}: Props) {
 
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async (productId: number) => {
+    await fetch("http://localhost:5000/cart/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: 1,
+        productId,
+      }),
+    });
 
-  }
+    onCartUpdate();
+  };
 
 
   return (
@@ -42,7 +54,8 @@ function ProductCard({
 
       {!cartQty ? (
         <button
-          onClick={() => onAdd(product)}
+          onClick={() => handleAddToCart(product.id)
+           }
           className="mt-2 bg-blue-500 text-white px-3 py-1 rounded"
         >
           Add to Cart

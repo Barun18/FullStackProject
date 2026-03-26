@@ -4,26 +4,26 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
+
+type CartItem = {
+  id: number;
+  productId: number;
+  quantity: number;
+  price: number;
+};
+
 function Navbar() {
 
-  // const item = useCartStore((state) => state.items)
-  // const totalQty = item.reduce((sum, item) =>
-  //   sum + item.quantity, 0)
-
   const navigate = useNavigate();
-
   const [searchInput, setSearchInput] = useState("");
-
+  const [totalQty, setTotalQty] = useState(0);
+  const [cartItems, setcartItems] = useState<CartItem[]>([]);
   const location = useLocation();
 
   useEffect(() => {
-
     const timer = setTimeout(() => {
-
       if (searchInput.trim() === "") return;
-
       // setSearch(searchInput);
-
       if (location.pathname !== "/search") {
         navigate("/search");
       }
@@ -33,6 +33,31 @@ function Navbar() {
   }, [searchInput]);
   console.log(location.pathname)
 
+
+  useEffect(() => {
+    fetch("http://localhost:5000/cart/1")
+      .then((res) => res.json())
+      .then((data) => {
+        const total = data.reduce(
+          (sum: number, item: any) => sum + item.quantity, 0);
+        setTotalQty(total);
+      });
+  }, []);
+
+  const fetchCartCount = async () => {
+    const res = await fetch("http://localhost:5000/cart/1");
+    const data = await res.json();
+
+    const total = data.reduce(
+      (sum: number, item: any) => sum + item.quantity,
+      0
+    );
+
+    setTotalQty(total);
+  };
+  useEffect(() => {
+    fetchCartCount();
+  }, []);
   return (
     <div
       className="flex justify-between items-center p-4
@@ -53,13 +78,13 @@ function Navbar() {
       <button
         className={`bg-blue-400 px-3 m-3 
       border-b-cyan-950 
-      ${(location.pathname === "/AddProduct" )
-        ? "opacity-40 cursor-not-allowed"
-      : "cursor-pointer"}`}
+      ${(location.pathname === "/AddProduct")
+            ? "opacity-40 cursor-not-allowed"
+            : "cursor-pointer"}`}
         onClick={() =>
           navigate("/AddProduct")
         }
-        disabled={location.pathname ==="/AddProduct" }>
+        disabled={location.pathname === "/AddProduct"}>
         Add New Product
       </button>
 
@@ -67,21 +92,21 @@ function Navbar() {
       <button
         className={`bg-blue-400 px-3 m-3 
       border-b-cyan-950 
-      ${location.pathname === "/AdminPage" 
-        ? "opacity-40 cursor-not-allowed"
-      : "cursor-pointer"}`}
+      ${location.pathname === "/AdminPage"
+            ? "opacity-40 cursor-not-allowed"
+            : "cursor-pointer"}`}
         onClick={() =>
           navigate("/AdminPage")
         }
-        disabled={location.pathname ==="/AdminPage"}>
-          Admin
+        disabled={location.pathname === "/AdminPage"}>
+        Admin
       </button>
 
       <button
-        // className="cursor-pointer"
-        // onClick={() =>
-        //   navigate("/cart")}>🛒:{totalQty}
-      ></button>
+        className="cursor-pointer"
+        onClick={() =>
+          navigate("/cart")}>🛒:{totalQty}
+      </button>
     </div>
   )
 }
