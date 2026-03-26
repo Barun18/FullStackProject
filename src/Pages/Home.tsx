@@ -4,6 +4,7 @@ import ProductCard from '../components/ProductCard';
 import { useState, useEffect } from 'react';
 import '../Css/Home.css'
 import { data, Link } from 'react-router-dom';
+import CartItem from '../components/CartItem';
 
 type Product = {
     id: number;
@@ -25,7 +26,8 @@ function Home() {
 
     const [products, setProducts] = useState<Product[]>([])
     const [selectedCategory, setSelectedCategory] = useState("All")
-    
+    const [cart, setCart] = useState<{ [key: number]: number }>({});
+
     useEffect(() => {
         getProductData().then(data => setProducts(data))
             .catch(err => console.log(err));
@@ -41,8 +43,38 @@ function Home() {
             products : products.filter(p =>
                 p.category.name === selectedCategory);
 
+
+    const handleAdd = (product: Product) => {
+        setCart(prev => ({
+            ...prev,
+            [product.id]: (prev[product.id] || 0) + 1
+        }));
+    };
+
+    const handleIncrease = (id: number) => {
+        setCart(prev => ({
+            ...prev,
+            [id]: prev[id] + 1
+        }));
+    };
+
+    const handleDecrease = (id: number) => {
+        setCart(prev => {
+            const updated = { ...prev };
+            if (updated[id] === 1) {
+                delete updated[id];
+            } else {
+                updated[id] -= 1;
+            }
+            return updated;
+        });
+    };
+
+    const cartItems = products.filter(p => cart[p.id]);
+    
     return (
         <div>
+            <CartItem items={cartItems} cart={cart} />
             <div className="flex gap-3 mb-4">
                 {categories.map((cat) => (
                     <button
@@ -66,7 +98,13 @@ function Home() {
 
             <div className="card">
                 {filteredProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                    <ProductCard key={product.id}
+                        product={product}
+                        cartQty={cart[product.id]}
+                        onAdd={handleAdd}
+                        onIncrease={handleIncrease}
+                        onDecrease={handleDecrease}
+                    />
                 ))}
 
             </div>

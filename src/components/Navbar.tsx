@@ -1,19 +1,16 @@
 
 import '../Css/Navbar.css'
-import useCartStore from '../store/useCartStore';
 import { useNavigate } from 'react-router-dom';
-import useSearhStore from '../store/useSearchStore';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 function Navbar() {
 
-  const item = useCartStore((state) => state.items)
-  const totalQty = item.reduce((sum, item) =>
-    sum + item.quantity, 0)
+  // const item = useCartStore((state) => state.items)
+  // const totalQty = item.reduce((sum, item) =>
+  //   sum + item.quantity, 0)
 
   const navigate = useNavigate();
-  const setSearch = useSearhStore((state) => state.setSearch);
 
   const [searchInput, setSearchInput] = useState("");
 
@@ -25,7 +22,7 @@ function Navbar() {
 
       if (searchInput.trim() === "") return;
 
-      setSearch(searchInput);
+      // setSearch(searchInput);
 
       if (location.pathname !== "/search") {
         navigate("/search");
@@ -81,10 +78,10 @@ function Navbar() {
       </button>
 
       <button
-        className="cursor-pointer"
-        onClick={() =>
-          navigate("/cart")}>🛒:{totalQty}
-      </button>
+        // className="cursor-pointer"
+        // onClick={() =>
+        //   navigate("/cart")}>🛒:{totalQty}
+      ></button>
     </div>
   )
 }
