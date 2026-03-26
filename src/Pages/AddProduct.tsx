@@ -12,7 +12,6 @@ function AddProduct() {
     const [productDate, setProductDate] = useState<string>();
     const [rating, setRating] = useState(0);
     const [review, setReview] = useState("");
-    // const [file, setFile] = useState<File | null>(null);
     const [img, setProductImage] = useState<string>("");
 
 

@@ -28,7 +28,7 @@ function CreatedAccount() {
 
             let data;
             try {
-                data = await res.json(); // inner try
+                data = await res.json();
             } catch {
                 data = {};
             }

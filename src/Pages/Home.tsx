@@ -3,40 +3,38 @@ import { getProductData } from '../services/Api';
 import ProductCard from '../components/ProductCard';
 import { useState, useEffect } from 'react';
 import '../Css/Home.css'
-import type { Product } from '../Type/product';
 import { data, Link } from 'react-router-dom';
 
+type Product = {
+    id: number;
+    title: string;
+    price: number;
+    img?: string;
+    type?: string;
+    rating?: number;
+    reviewCount?: number;
+
+    category: {
+        id: number;
+        name: string;
+    };
+};
 
 
 function Home() {
 
-    // const products: Product[] = getProductData();
-    // const [selectedCategory, setSelectedCategory] = useState("All")
-    // const categories: string[] = [
-    //     "All",
-    //     ...Array.from(new Set(products.map(p => p.category)))];
-
-    // const filteredProducts = selectedCategory === "All"
-    //     ? products
-    //     : products.filter(p => p.category === selectedCategory);
-
-    // const [selectedGroup, setSelectedGroup] = useState("");
-    //     if ( selectedGroup === "fruit"){
-    //         console.log("Fruit selected");
-    //     }
-
     const [products, setProducts] = useState<Product[]>([])
     const [selectedCategory, setSelectedCategory] = useState("All")
+    
+    useEffect(() => {
+        getProductData().then(data => setProducts(data))
+            .catch(err => console.log(err));
+    }, [])
 
     const categories: string[] = [
         "All",
         ...Array.from(new Set(products.map(p => p.category.name)))
     ];
-
-    useEffect(() => {
-        getProductData().then(data => setProducts(data))
-            .catch(err => console.log(err));
-    },[])
 
     const filteredProducts =
         selectedCategory === "All" ?
