@@ -99,13 +99,13 @@ app.post("/signin", async (req, res) => {
     return res.status(400).json({ error: "Something went wrong" });
   }
   const result = await bcrypt.compare(req.body.password, user.password);
-    if (result) {
-      const token = jwt.sign({ email: user.email }, "mysecretKey");
-      res.cookie("token", token, { httpOnly: true });
-      res.status(200).json({ message: "You logged in" });
-    }
-    else res.status(400).json({ message: "Something went wrong" });
-  
+  if (result) {
+    const token = jwt.sign({ email: user.email }, "mysecretKey");
+    res.cookie("token", token, { httpOnly: true });
+    res.status(200).json({ message: "You logged in" });
+  }
+  else res.status(400).json({ message: "Something went wrong" });
+
 })
 
 
@@ -126,9 +126,9 @@ app.listen(5000, () => {
 
 
 
-//TODO:-- request for adding cart item into cartItem
+//TODO:-- request for adding cartitem into cart
 app.post("/cart/add", async (req, res) => {
-  
+
   const { userId, productId } = req.body;
 
   try {
@@ -183,6 +183,100 @@ app.post("/cart/add", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Error adding to cart" });
+  }
+});
+
+
+app.post("/cart/increase", async (req, res) => {
+  const { userId, productId } = req.body;
+
+  try {
+    const cart = await prisma.cart.findUnique({
+      where: { userId },
+    });
+
+    if (!cart) return res.status(404).json({ eror: "cart not found" });
+
+    const item = await prisma.cartItem.findUnique({
+      where: {
+        cartId_productId: {
+          cartId: cart.id,
+          productId,
+        },
+      },
+    });
+    if (!item) return res.status(404).json({ error: "Item not found" });
+    const updated = await prisma.cartItem.update({
+      where: {
+        cartId_productId: {
+          cartId: cart.id,
+          productId,
+        },
+      },
+      data: {
+        quantity: item.quantity + 1,
+      },
+    });
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Increase failed" });
+  }
+});
+
+
+app.post("/cart/decrease", async (req, res) => {
+  const { userId, productId } = req.body;
+
+  try {
+    const cart = await prisma.cart.findUnique({
+      where: { userId },
+    });
+
+    if (!cart) return res.status(404).json({ error: "Cart not found" });
+
+    const item = await prisma.cartItem.findUnique({
+      where: {
+        cartId_productId: {
+          cartId: cart.id,
+          productId,
+        },
+      },
+    });
+
+    if (!item) return res.status(404).json({ error: "Item not found" });
+
+    //  if quantity = 1 → delete item
+    if (item.quantity === 1) {
+      await prisma.cartItem.delete({
+        where: {
+          cartId_productId: {
+            cartId: cart.id,
+            productId,
+          },
+        },
+      });
+
+      return res.json({ message: "Item removed" });
+    }
+
+    //  else decrease quantity
+    const updated = await prisma.cartItem.update({
+      where: {
+        cartId_productId: {
+          cartId: cart.id,
+          productId,
+        },
+      },
+      data: {
+        quantity: item.quantity - 1,
+      },
+    });
+
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Decrease failed" });
   }
 });
 

@@ -58,7 +58,9 @@ export const useCartStore = create<CartStore>((set) => ({
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ productId }),
+      body: JSON.stringify({ 
+        userId: 1,
+        productId }),
     });
 
     await useCartStore.getState().fetchCart();
@@ -70,7 +72,9 @@ export const useCartStore = create<CartStore>((set) => ({
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ productId }),
+      body: JSON.stringify({ 
+        userId: 1,
+        productId }),
     });
 
     await useCartStore.getState().fetchCart();
