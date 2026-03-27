@@ -27,7 +27,7 @@ export const useCartStore = create<CartStore>((set) => ({
   totalQty: 0,
 
   fetchCart: async () => {
-    const res = await fetch("http://localhost:5000/cart/1", {
+    const res = await fetch("http://localhost:5000/cart", {
       credentials: "include",
     });
     const data = await res.json();
@@ -38,6 +38,7 @@ export const useCartStore = create<CartStore>((set) => ({
     );
 
     set({ cartItems: data, totalQty: total });
+    console.log("Cart Data:", data);
   },
 
   addToCart: async (productId) => {
@@ -46,7 +47,8 @@ export const useCartStore = create<CartStore>((set) => ({
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userId: 1, productId }),
+      credentials: "include",
+      body: JSON.stringify({ productId }),
     });
 
     await useCartStore.getState().fetchCart();
@@ -58,9 +60,8 @@ export const useCartStore = create<CartStore>((set) => ({
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ 
-        userId: 1,
-        productId }),
+      credentials: "include",
+      body: JSON.stringify({ productId }),
     });
 
     await useCartStore.getState().fetchCart();
@@ -72,9 +73,8 @@ export const useCartStore = create<CartStore>((set) => ({
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ 
-        userId: 1,
-        productId }),
+      credentials: "include",
+      body: JSON.stringify({ productId }),
     });
 
     await useCartStore.getState().fetchCart();

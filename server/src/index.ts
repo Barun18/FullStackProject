@@ -3,7 +3,6 @@ const app = express();
 import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
-import productRoutes from "./routes/product.routes.js";
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -50,11 +49,8 @@ app.get("/products/:id", async (req, res) => {
 
 //TODO:-- From here authentication is started
 
-// app.get("/", function (req, res) {
-//     res.send("working");
-// })
 app.get("/register", function (req, res) {
-  // res.render("register");
+
   res.json({ message: "Register endpoint ready" });
 })
 
@@ -62,11 +58,9 @@ app.post("/register", async (req, res) => {
   try {
     let { username, email, password, age } = req.body;
 
-    // bcrypt.genSalt(10, (err, salt) => {
-    //     bcrypt.hash(password, salt, async (err, hash) => {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         username,
         email,
@@ -75,7 +69,11 @@ app.post("/register", async (req, res) => {
       },
     });
 
-    const token = jwt.sign({ email }, "mysecretKey");
+    const token = jwt.sign({ 
+      userId: user.id,
+      email: user.email 
+    }, "mysecretKey");
+
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: "lax",
@@ -89,6 +87,23 @@ app.post("/register", async (req, res) => {
   }
 })
 
+
+const getUserFromToken = async (req: any) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) return null;
+
+    const decoded: any = jwt.verify(token, "mysecretKey");
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+    });
+
+    return user;
+  } catch {
+    return null
+  }
+};
+
 app.post("/signin", async (req, res) => {
   const user = await prisma.user.findUnique({
     where: {
@@ -100,8 +115,18 @@ app.post("/signin", async (req, res) => {
   }
   const result = await bcrypt.compare(req.body.password, user.password);
   if (result) {
-    const token = jwt.sign({ email: user.email }, "mysecretKey");
-    res.cookie("token", token, { httpOnly: true });
+    const token = jwt.sign({ 
+      userId: user.id,
+      email: user.email }, 
+      "mysecretKey");
+    
+    res.clearCookie("token");
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+    });
     res.status(200).json({ message: "You logged in" });
   }
   else res.status(400).json({ message: "Something went wrong" });
@@ -128,71 +153,97 @@ app.listen(5000, () => {
 
 //TODO:-- request for adding cartitem into cart
 app.post("/cart/add", async (req, res) => {
+  const user = await getUserFromToken(req);
+  if (!user) {
+    return res.status(401).json({ error: "Unauthoridzed" })
+  }
+  const { productId } = req.body;
 
-  const { userId, productId } = req.body;
+  // 1. Find or create cart
+  let cart = await prisma.cart.findUnique({
+    where: { userId: user.id },
+  });
 
-  try {
-    // 1. Find or create cart
-    let cart = await prisma.cart.findUnique({
-      where: { userId },
+  if (!cart) {
+    cart = await prisma.cart.create({
+      data: { userId: user.id },
     });
+  }
 
-    if (!cart) {
-      cart = await prisma.cart.create({
-        data: { userId },
-      });
-    }
+  // 2. Check if item already exists
+  const existingItem = await prisma.cartItem.findUnique({
+    where: {
+      cartId_productId: {
+        cartId: cart.id,
+        productId,
+      },
+    },
+  });
 
-    // 2. Check if item already exists
-    const existingItem = await prisma.cartItem.findUnique({
+  // 3. If exists → increase quantity
+  if (existingItem) {
+    const updated = await prisma.cartItem.update({
       where: {
         cartId_productId: {
           cartId: cart.id,
           productId,
         },
       },
-    });
-
-    // 3. If exists → increase quantity
-    if (existingItem) {
-      const updated = await prisma.cartItem.update({
-        where: {
-          cartId_productId: {
-            cartId: cart.id,
-            productId,
-          },
-        },
-        data: {
-          quantity: existingItem.quantity + 1,
-        },
-      });
-
-      return res.json(updated);
-    }
-
-    // 4. Else → create new item
-    const newItem = await prisma.cartItem.create({
       data: {
-        cartId: cart.id,
-        productId,
-        quantity: 1,
+        quantity: existingItem.quantity + 1,
       },
     });
 
-    res.json(newItem);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error adding to cart" });
+    return res.json(updated);
   }
+
+  // 4. Else → create new item
+  const newItem = await prisma.cartItem.create({
+    data: {
+      cartId: cart.id,
+      productId,
+      quantity: 1,
+    },
+  });
+
+  res.json(newItem);
 });
 
 
+//!:-- get cart with Product details
+app.get("/cart", async (req, res) => {
+  const user = await getUserFromToken(req);
+  if (!user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const cart = await prisma.cart.findUnique({
+    where: { userId: user.id },
+    include: {
+      items: {
+        include: {
+          product: true,
+        },
+      },
+    },
+  });
+
+  res.json(cart?.items || []);
+});
+
+//! Increase cart item
 app.post("/cart/increase", async (req, res) => {
-  const { userId, productId } = req.body;
+  const user = await getUserFromToken(req);
+
+  if(!user){
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const { productId } = req.body;
 
   try {
     const cart = await prisma.cart.findUnique({
-      where: { userId },
+      where: { userId: user.id },
     });
 
     if (!cart) return res.status(404).json({ eror: "cart not found" });
@@ -205,6 +256,7 @@ app.post("/cart/increase", async (req, res) => {
         },
       },
     });
+
     if (!item) return res.status(404).json({ error: "Item not found" });
     const updated = await prisma.cartItem.update({
       where: {
@@ -226,11 +278,17 @@ app.post("/cart/increase", async (req, res) => {
 
 
 app.post("/cart/decrease", async (req, res) => {
-  const { userId, productId } = req.body;
+  const user = await getUserFromToken(req);
+
+  if(!user){
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const { productId } = req.body;
 
   try {
     const cart = await prisma.cart.findUnique({
-      where: { userId },
+      where: { userId: user.id },
     });
 
     if (!cart) return res.status(404).json({ error: "Cart not found" });
@@ -281,20 +339,3 @@ app.post("/cart/decrease", async (req, res) => {
 });
 
 
-//TODO:-- get cart with Product details
-app.get("/cart/:userId", async (req, res) => {
-  const userId = Number(req.params.userId);
-
-  const cart = await prisma.cart.findUnique({
-    where: { userId },
-    include: {
-      items: {
-        include: {
-          product: true,
-        },
-      },
-    },
-  });
-
-  res.json(cart?.items || []);
-});
