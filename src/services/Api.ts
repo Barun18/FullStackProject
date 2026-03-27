@@ -15,7 +15,7 @@ export async function getProductData (){
    return res.json();
 } 
 
-export async function getSingleProduct(id: string){
+export async function getSingleProduct(id: number){
     const res = await fetch(`http://localhost:5000/products/${id}`)
 
     if(!res.ok){

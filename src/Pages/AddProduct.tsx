@@ -1,5 +1,5 @@
 import { useState,useEffect } from "react";
-import type { Product } from "../Type/product"
+import type { Product } from "../Type/Product"
 import { useParams } from "react-router-dom";
 import { getProductData } from "../services/Api";
 
