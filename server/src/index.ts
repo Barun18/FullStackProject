@@ -18,11 +18,14 @@ const __dirname = path.dirname(__filename);
 // app.set("view engine", "ejs");
 // app.set("views", path.join(__dirname, "views"));
 
+//! Middleware
 app.use(cors({
   origin: "http://localhost:5173",
   credentials: true
 }));
 
+
+//! Display products
 app.get("/products", async (req, res) => {
   const products = await prisma.product.findMany({
     include: {
@@ -31,6 +34,7 @@ app.get("/products", async (req, res) => {
   });
   res.json(products);
 });
+
 
 app.get("/products/:id", async (req, res) => {
   const id = Number(req.params.id);
@@ -45,9 +49,52 @@ app.get("/products/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: "Error fetching product" });
   }
+}); 
+
+ 
+//! Review system
+
+
+//GET review
+app.get("/reviews/:productId", async (req,res) => {
+  
+  try {
+    const reviews = await prisma.review.findMany({
+    where: { productId: Number(req.params.productId) },
+    include: {
+      user: true,
+    },
+  });
+  // if(!reviews) return res.json({ message: "Give your review"});
+  res.json(reviews);
+}catch(err){
+  console.log(err);
+  res.status(500).json({ er: " Failed to fetch reviews"});
+}
 });
 
-//TODO:-- From here authentication is started
+// POST review
+app.post("/review", async (req,res) =>{
+  try{
+    console.log("BODY:",req.body);
+
+  const review = await prisma.review.create({
+    data: {
+      productId: Number(req.body.productId),
+      userId:Number(req.body.userId),
+      rating: Number(req.body.rating),
+      comment: req.body.comment,
+    }
+  });
+  res.json(review);
+}catch(err){
+  console.error(err);
+  res.status(500).json({ error: "Failed to create review "});
+}
+});
+
+
+//!:-- From here authentication is started
 
 app.get("/register", function (req, res) {
 
@@ -151,7 +198,7 @@ app.listen(5000, () => {
 
 
 
-//TODO:-- request for adding cartitem into cart
+//!:-- Handle Cart System 
 app.post("/cart/add", async (req, res) => {
   const user = await getUserFromToken(req);
   if (!user) {
