@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function SignIn() {
+    const navigate = useNavigate();
     const [ form, setForm ] = useState({
         email: "",
         password: ""
@@ -26,8 +28,9 @@ function SignIn() {
                 alert(data.error || "Something went wrong" )
                 return ;
             }
-            console.log(data);
+            // console.log(data);
             alert("Login successful");
+            navigate("/");    
 
         }catch(err){
             console.error(err);

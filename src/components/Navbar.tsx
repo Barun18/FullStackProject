@@ -74,14 +74,15 @@ function Navbar() {
         🛒 {totalQty}
       </button>
 
-      <div className="relative">
+      <div className="relative"
+      onMouseLeave={() => setOpen(false)}>
         <div
           onClick={() => setOpen(!open)}
           className="w-8 h-8 bg-gray-400 rounded-full flex items-center">
           <FaUserCircle size={28} />
         </div>
         {open && (
-          <div className="absolute right-0 mt-2 w-44
+          <div className="absolute right-0 top-ful w-44
           bg-gray-800 text-white border border-gray-600
           rounded-lg shadow-lg z-50 flex flex-col">
             <button className="w-full text-left px-4 py-2 hover:bg-gray-700">
@@ -92,7 +93,8 @@ function Navbar() {
               Orders
             </button>
 
-            <button className="w-full text-left px-4 py-2 hover:bg-gray-700">
+            <button className="w-full text-left px-4 py-2 hover:bg-gray-700"
+            onClick={() => navigate(`/logout`)}>
               Logout
             </button>
           </div>
