@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function SignIn() {
+function SignIn({ loadUser }: any) {
+
     const navigate = useNavigate();
     const [ form, setForm ] = useState({
         email: "",
@@ -29,12 +30,13 @@ function SignIn() {
                 return ;
             }
             // console.log(data);
-            alert("Login successful");
+            alert("Signin successful");
+            await loadUser();
             navigate("/");    
 
         }catch(err){
             console.error(err);
-            alert("Login failed");
+            alert("Signin failed");
         };
     }
 
@@ -43,7 +45,7 @@ function SignIn() {
         <form onSubmit={handleSubmit}>
             <input onChange={handleChange} name="email" placeholder="user email"/>
             <input onChange={handleChange} name="password" placeholder="password"/>
-            <button type="submit">Log in</button>
+            <button type="submit">Sign in</button>
         </form>
     </div>
     )

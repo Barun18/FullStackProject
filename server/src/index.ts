@@ -107,12 +107,12 @@ app.post("/review", async (req, res) => {
 
 //!:-- From here authentication is started
 
-app.get("/register", function (req, res) {
+app.get("/signup", function (req, res) {
 
-  res.json({ message: "Register endpoint ready" });
+  res.json({ message: "Sign up endpoint ready" });
 })
 
-app.post("/register", async (req, res) => {
+app.post("/signup", async (req, res) => {
   try {
     let { username, email, password, age } = req.body;
 
@@ -135,7 +135,8 @@ app.post("/register", async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: "lax",
-      secure: false
+      secure: false,
+      path: "/"
     });
     res.json({ message: "Your accoount is created" });
 
@@ -161,6 +162,15 @@ const getUserFromToken = async (req: any) => {
     return null
   }
 };
+ 
+app.get("/me", async (req, res) => {
+  console.log("cookie:",req.cookies);
+  const user = await getUserFromToken(req);
+  if (!user) {
+    return res.status(401).json({ user: null });
+  }
+  res.json({ user });
+});
 
 app.post("/signin", async (req, res) => {
   const user = await prisma.user.findUnique({
@@ -179,34 +189,36 @@ app.post("/signin", async (req, res) => {
     },
       "mysecretKey");
 
-    res.clearCookie("token");
 
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: "lax",
       secure: false,
+      path: "/"
     });
-    res.status(200).json({ message: "You logged in" });
+    res.status(200).json({ message: "You sign in",
+      user: {
+        id: user.id,
+        email: user.email, 
+        },
+     });
   }
   else res.status(400).json({ message: "Something went wrong" });
-
 })
 
 
-app.get("/logout", (req, res) => {
+app.post("/signout", (req, res) => {
+  console.log("SIGNOUT HIT");
   res.clearCookie("token", {
     httpOnly: true,
-    sameSite: "strict"
+    sameSite: "lax",
+    secure: false,
+    path: "/"
   });
-
-  res.json({ message: "Logout successful" });
+  res.json({ message: "Sign out successful" });
 });
 
 
-
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
-});
 
 
 
@@ -398,3 +410,9 @@ app.post("/cart/decrease", async (req, res) => {
 });
 
 
+
+
+
+app.listen(5000, () => {
+  console.log("Server running on port 5000");
+});

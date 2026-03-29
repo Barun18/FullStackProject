@@ -2,7 +2,6 @@ import { useParams } from "react-router-dom";
 import { getSingleProduct } from '../services/Api';
 import "../Css/ProductDetails.css"
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 
 function ProductDetails() {
 

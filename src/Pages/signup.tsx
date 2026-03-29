@@ -1,7 +1,9 @@
 import { useState } from "react";
-
+import { useNavigate } from "react-router-dom";
 
 function CreatedAccount() {
+    
+    const navigate = useNavigate();
     const [form, setForm] = useState({
         username: "",
         email: "",
@@ -17,7 +19,7 @@ function CreatedAccount() {
         e.preventDefault();
 
         try {
-            const res = await fetch("http://localhost:5000/register", {
+            const res = await fetch("http://localhost:5000/signup", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -33,7 +35,8 @@ function CreatedAccount() {
                 data = {};
             }
             if (res.ok) {
-                alert("Account Created Successfully.")
+                alert("Account Created Successfully.");
+                navigate("/signin");
             } else {
                 alert(data.error || "Something went wrong!");
             }

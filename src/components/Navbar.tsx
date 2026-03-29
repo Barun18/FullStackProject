@@ -1,12 +1,12 @@
 
-
 import '../Css/Navbar.css'
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useCartStore } from "../store/useCartStore";
 import { FaUserCircle } from 'react-icons/fa';
 
-function Navbar() {
+
+function Navbar({ user, loadUser}: any) {
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -18,10 +18,12 @@ function Navbar() {
   const totalQty = useCartStore((state) => state.totalQty);
   const fetchCart = useCartStore((state) => state.fetchCart);
 
+
   //  fetch cart once when app loads
   useEffect(() => {
+    if(user)
     fetchCart();
-  }, []);
+  }, [user]);
 
   //  search logic (unchanged)
   useEffect(() => {
@@ -94,8 +96,20 @@ function Navbar() {
             </button>
 
             <button className="w-full text-left px-4 py-2 hover:bg-gray-700"
-            onClick={() => navigate(`/logout`)}>
-              Logout
+            onClick={async () => {
+              console.log(user);
+              if(user){
+                await fetch("http://localhost:5000/signout",{
+                  method: "POST",
+                  credentials: "include",
+                });
+                await loadUser();
+                navigate("/signin");
+              }else{
+                navigate("/signin");
+              }
+            }}>
+              {user ? "signout" : "signin"}
             </button>
           </div>
         )}

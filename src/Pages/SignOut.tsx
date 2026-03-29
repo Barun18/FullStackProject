@@ -1,12 +1,12 @@
 import { useNavigate } from "react-router-dom";
 
-function Logout() {
+function SignOut() {
     const navigate = useNavigate();
 
-    const handleLogout = async (e: any) => {
+    const handleSignOut = async (e: any) => {
         e.preventDefault();
 
-        const res = await fetch("http://localhost:5000/logout", {
+        const res = await fetch("http://localhost:5000/signout", {
             method: "GET",
             credentials: "include"
         });
@@ -20,7 +20,7 @@ function Logout() {
             <h2>Are you sure you want to Log out?</h2>
             <button
                 className="bg-blue-500 px-2 py-1 mt-2"
-                onClick={handleLogout}
+                onClick={handleSignOut}
             >Yes
             </button>
             <button
@@ -32,4 +32,4 @@ function Logout() {
     )
 }
 
-export default Logout;
+export default SignOut;
