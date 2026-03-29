@@ -4,6 +4,7 @@ import '../Css/Navbar.css'
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useCartStore } from "../store/useCartStore";
+import { FaUserCircle } from 'react-icons/fa';
 
 function Navbar() {
 
@@ -11,6 +12,7 @@ function Navbar() {
   const location = useLocation();
 
   const [searchInput, setSearchInput] = useState("");
+  const [open, setOpen] = useState(false);
 
   //  get cart count directly from Zustand
   const totalQty = useCartStore((state) => state.totalQty);
@@ -68,11 +70,34 @@ function Navbar() {
         Admin
       </button>
 
-      {/*  Cart count from Zustand */}
       <button onClick={() => navigate("/cart")}>
         🛒 {totalQty}
       </button>
 
+      <div className="relative">
+        <div
+          onClick={() => setOpen(!open)}
+          className="w-8 h-8 bg-gray-400 rounded-full flex items-center">
+          <FaUserCircle size={28} />
+        </div>
+        {open && (
+          <div className="absolute right-0 mt-2 w-44
+          bg-gray-800 text-white border border-gray-600
+          rounded-lg shadow-lg z-50 flex flex-col">
+            <button className="w-full text-left px-4 py-2 hover:bg-gray-700">
+              Profile
+            </button>
+
+            <button className="w-full text-left px-4 py-2 hover:bg-gray-700">
+              Orders
+            </button>
+
+            <button className="w-full text-left px-4 py-2 hover:bg-gray-700">
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

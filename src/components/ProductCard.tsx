@@ -11,6 +11,7 @@ type Props = {
 function ProductCard({ product }: Props) {
   const addToCart = useCartStore((state) => state.addToCart);
   const navigate = useNavigate();
+  
 
 
   return (
@@ -23,12 +24,20 @@ function ProductCard({ product }: Props) {
       <h3 className="text-white">{product.title}</h3>
       <p className="text-white">₹{product.price}</p>
 
+    <div className="flex gap-3.5">
       <button
         onClick={() => addToCart(product.id)}
-        className="bg-blue-500 px-3 py-1 mt-2"
+        className="bg-blue-500 px-2 py-1 mt-2"
       >
         Add to Cart
       </button>
+      <button
+        onClick={() => navigate(`/buy/${ product.id }`)}
+        className="bg-blue-500 px-2 py-1 mt-2"
+      >
+        Buy Now
+      </button>
+      </div>
     </div>
   );
 }

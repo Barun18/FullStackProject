@@ -11,6 +11,8 @@ import SearchProduct from './Pages/searchproduct';
 import CreatedAccount from './Pages/signup';
 import SignIn from './Pages/signin';
 import Logout from './Pages/logout';
+import BuyPage from './Pages/buyPage';
+import Payment from './Pages/payment';
 
 
 
@@ -34,6 +36,8 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/group/:groupName" element={<GroupProduct/>}/>
+        <Route path="/buy/:id" element={<BuyPage/>}/>
+        <Route path="/payment/:id" element={<Payment />}/>
         
       </Routes>
   

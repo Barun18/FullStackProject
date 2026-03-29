@@ -49,48 +49,59 @@ app.get("/products/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: "Error fetching product" });
   }
-}); 
+});
 
- 
+app.get("/buy/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id },
+    })
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ message: "No details are available" });
+  }
+})
+
 //! Review system
 
 
 //GET review
-app.get("/reviews/:productId", async (req,res) => {
-  
+app.get("/reviews/:productId", async (req, res) => {
+
   try {
     const reviews = await prisma.review.findMany({
-    where: { productId: Number(req.params.productId) },
-    include: {
-      user: true,
-    },
-  });
-  // if(!reviews) return res.json({ message: "Give your review"});
-  res.json(reviews);
-}catch(err){
-  console.log(err);
-  res.status(500).json({ er: " Failed to fetch reviews"});
-}
+      where: { productId: Number(req.params.productId) },
+      include: {
+        user: true,
+      },
+    });
+    // if(!reviews) return res.json({ message: "Give your review"});
+    res.json(reviews);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ er: " Failed to fetch reviews" });
+  }
 });
 
 // POST review
-app.post("/review", async (req,res) =>{
-  try{
-    console.log("BODY:",req.body);
+app.post("/review", async (req, res) => {
+  try {
+    console.log("BODY:", req.body);
 
-  const review = await prisma.review.create({
-    data: {
-      productId: Number(req.body.productId),
-      userId:Number(req.body.userId),
-      rating: Number(req.body.rating),
-      comment: req.body.comment,
-    }
-  });
-  res.json(review);
-}catch(err){
-  console.error(err);
-  res.status(500).json({ error: "Failed to create review "});
-}
+    const review = await prisma.review.create({
+      data: {
+        productId: Number(req.body.productId),
+        userId: Number(req.body.userId),
+        rating: Number(req.body.rating),
+        comment: req.body.comment,
+      }
+    });
+    res.json(review);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create review " });
+  }
 });
 
 
@@ -116,9 +127,9 @@ app.post("/register", async (req, res) => {
       },
     });
 
-    const token = jwt.sign({ 
+    const token = jwt.sign({
       userId: user.id,
-      email: user.email 
+      email: user.email
     }, "mysecretKey");
 
     res.cookie("token", token, {
@@ -162,11 +173,12 @@ app.post("/signin", async (req, res) => {
   }
   const result = await bcrypt.compare(req.body.password, user.password);
   if (result) {
-    const token = jwt.sign({ 
+    const token = jwt.sign({
       userId: user.id,
-      email: user.email }, 
+      email: user.email
+    },
       "mysecretKey");
-    
+
     res.clearCookie("token");
 
     res.cookie("token", token, {
@@ -282,7 +294,7 @@ app.get("/cart", async (req, res) => {
 app.post("/cart/increase", async (req, res) => {
   const user = await getUserFromToken(req);
 
-  if(!user){
+  if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
@@ -327,7 +339,7 @@ app.post("/cart/increase", async (req, res) => {
 app.post("/cart/decrease", async (req, res) => {
   const user = await getUserFromToken(req);
 
-  if(!user){
+  if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
