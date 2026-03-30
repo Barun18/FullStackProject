@@ -20,6 +20,7 @@ type CartStore = {
   addToCart: (productId: number) => Promise<void>;
   increaseQty: (productId: number) => Promise<void>;
   decreaseQty: (productId: number) => Promise<void>;
+  clearCart: () => void;
 };
 
 export const useCartStore = create<CartStore>((set) => ({
@@ -79,4 +80,5 @@ export const useCartStore = create<CartStore>((set) => ({
 
     await useCartStore.getState().fetchCart();
   },
+  clearCart: () => set({ cartItems: [], totalQty: 0 }),
 }));

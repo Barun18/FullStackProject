@@ -162,9 +162,8 @@ const getUserFromToken = async (req: any) => {
     return null
   }
 };
- 
+
 app.get("/me", async (req, res) => {
-  console.log("cookie:",req.cookies);
   const user = await getUserFromToken(req);
   if (!user) {
     return res.status(401).json({ user: null });
@@ -196,25 +195,33 @@ app.post("/signin", async (req, res) => {
       secure: false,
       path: "/"
     });
-    res.status(200).json({ message: "You sign in",
+    res.status(200).json({
+      message: "You sign in",
       user: {
         id: user.id,
-        email: user.email, 
-        },
-     });
+        email: user.email,
+      },
+    });
   }
   else res.status(400).json({ message: "Something went wrong" });
 })
 
 
 app.post("/signout", (req, res) => {
-  console.log("SIGNOUT HIT");
   res.clearCookie("token", {
     httpOnly: true,
     sameSite: "lax",
     secure: false,
     path: "/"
   });
+  // Fortce to delete stored cookie inside browser 
+  res.cookie("token", "", {
+    httpOnly: true,
+    expires: new Date(0),
+    sameSite: "lax",
+    secure: false,
+    path: "/"
+  })
   res.json({ message: "Sign out successful" });
 });
 
@@ -291,7 +298,7 @@ app.get("/cart", async (req, res) => {
   const cart = await prisma.cart.findUnique({
     where: { userId: user.id },
     include: {
-      items: {
+      cartItem: {
         include: {
           product: true,
         },
@@ -299,7 +306,7 @@ app.get("/cart", async (req, res) => {
     },
   });
 
-  res.json(cart?.items || []);
+  res.json(cart?.cartItem || []);
 });
 
 //! Increase cart item
@@ -410,6 +417,65 @@ app.post("/cart/decrease", async (req, res) => {
 });
 
 
+app.get("/profile", async (req, res) => {
+  const user = await getUserFromToken(req);
+  if (!user) return res.status(401).json({});
+  res.json(user);
+})
+
+app.put("/profile", async (req, res) => {
+  const user = await getUserFromToken(req);
+  if (!user) return res.status(401).json({});
+
+  const updated = await prisma.user.update({
+    where: { id: user.id },
+    data: req.body,
+  });
+
+  res.json(updated);
+})
+
+app.get("/orders", async (req, res) => {
+  const user = await getUserFromToken(req);
+  if (!user) return res.status(401).json([]);
+  const orders = await prisma.order.findMany({
+    where: { userId: user.id },
+    include: {
+      items: {
+        include: {
+          product:
+            true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  res.json(orders);
+})
+
+app.post("/order", async (req, res) => {
+  const user = await getUserFromToken(req);
+  if (!user) return res.status(401).json({});
+
+  const { items } = req.body;
+  const total = items.reduce(
+    (sum: number, item: any) => sum + item.price * item.quantity,
+    0
+  );
+
+  const order = await prisma.order.create({
+    data: {
+      userId: user.id,
+      total,
+      status: "pending",
+      items: {
+        create: items,
+      },
+    },
+    include: { items: true },
+  });
+  res.json(order);
+});
 
 
 

@@ -6,12 +6,21 @@ import { useNavigate } from "react-router-dom";
 
 type Props = {
   product: Product;
+  user: any;
 };
 
-function ProductCard({ product }: Props) {
+function ProductCard({ product, user }: Props) {
   const addToCart = useCartStore((state) => state.addToCart);
   const navigate = useNavigate();
   
+  const handleBuyNow =() => {
+    if(!user) {
+      alert("Please sign in first or create an account");
+      navigate("signin");
+      return;
+    }
+    navigate(`/buy/${product.id}`)
+  }
 
 
   return (
@@ -32,7 +41,7 @@ function ProductCard({ product }: Props) {
         Add to Cart
       </button>
       <button
-        onClick={() => navigate(`/buy/${ product.id }`)}
+        onClick={handleBuyNow}
         className="bg-blue-500 px-2 py-1 mt-2"
       >
         Buy Now

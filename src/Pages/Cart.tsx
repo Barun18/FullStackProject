@@ -4,32 +4,22 @@ import { useEffect, useState } from "react";
 import { useCartStore } from "../store/useCartStore";
 import CartItem from "../components/CartItem";
 
-function CartPage() {
+type Props = {
+  user: any;
+}
+function Cart({ user }: any) {
   const fetchCart = useCartStore((state) => state.fetchCart);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
+  const clearCart = useCartStore((state) => state.clearCart);
   useEffect(() => {
-    fetch("http://localhost:5000/me", {
-      credentials: "include",
-    })
-      .then(res => res.json())
-      .then(data => {
-        setUser(data.user);
-
-        if (data.user) {
-          fetchCart(); //If user logged in we can can fetchcart();
-        }
-      })
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) return <p>Loading...</p>;
-
-  if (!user) return <p>Please login to view cart</p>;
+    if (user) {
+      fetchCart();
+    } else {
+      clearCart();
+    }
+  }, [user]);
+  if (!user) return <p>please Login to view cart</p>
 
   return <CartItem />;
 }
 
-export default CartPage;
+export default Cart;

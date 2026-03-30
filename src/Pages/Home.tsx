@@ -15,8 +15,12 @@ type Product = {
     name: string;
   };
 };
+type Props = {
+  user: any;
+};
 
-function Home() {
+function Home({ user }: Props) {
+
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
@@ -52,10 +56,14 @@ function Home() {
 
       <div className="card">
         {filteredProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard
+            key={product.id}
+            product={product}
+            user={user}
+          />
         ))}
       </div>
-      
+
     </div>
   );
 }

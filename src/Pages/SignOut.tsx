@@ -1,19 +1,27 @@
 import { useNavigate } from "react-router-dom";
+import { useCartStore } from "../store/useCartStore";
 
-function SignOut() {
+type Props ={
+    loadUser: (user:any) => void;
+}
+
+function SignOut({ loadUser }:Props) {
     const navigate = useNavigate();
 
     const handleSignOut = async (e: any) => {
         e.preventDefault();
 
-        const res = await fetch("http://localhost:5000/signout", {
-            method: "GET",
+     await fetch("http://localhost:5000/signout", {
+            method: "POST",
             credentials: "include"
         });
-        const data = await res.json();
-        alert(data.message);
-        window.location.href = "/signin";
-    }
+        loadUser(null);
+       useCartStore.getState().clearCart();
+       alert("signout successful");
+        setTimeout(() => {
+            navigate("/signin");
+        }, 1500);
+    };
 
     return (
         <div className="px-5 mt-3">

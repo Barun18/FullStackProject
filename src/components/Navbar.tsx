@@ -87,7 +87,9 @@ function Navbar({ user, loadUser}: any) {
           <div className="absolute right-0 top-ful w-44
           bg-gray-800 text-white border border-gray-600
           rounded-lg shadow-lg z-50 flex flex-col">
-            <button className="w-full text-left px-4 py-2 hover:bg-gray-700">
+            <button className="w-full text-left px-4 py-2 hover:bg-gray-700"
+            onClick={() => navigate(`/profile`)}
+            >
               Profile
             </button>
 
@@ -97,16 +99,18 @@ function Navbar({ user, loadUser}: any) {
 
             <button className="w-full text-left px-4 py-2 hover:bg-gray-700"
             onClick={async () => {
-              console.log(user);
-              if(user){
+              if(user) {
                 await fetch("http://localhost:5000/signout",{
                   method: "POST",
                   credentials: "include",
                 });
-                await loadUser();
+                loadUser(null);
+                useCartStore.getState().clearCart();
+
                 navigate("/signin");
               }else{
                 navigate("/signin");
+                
               }
             }}>
               {user ? "signout" : "signin"}
