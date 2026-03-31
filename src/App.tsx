@@ -19,6 +19,7 @@ import Payment from './Pages/payment';
 
 
 function App() {
+  
   const [user, setUser] = useState(null);
   const loadUser = async () => {
     try {
@@ -55,9 +56,9 @@ function App() {
           <Route path="/signin" element={<SignIn loadUser={loadUser} />} />
           <Route path="/signout" element={<SignOut loadUser={loadUser} />} />
           <Route path="/group/:groupName" element={<GroupProduct />} />
-          <Route path="/buy/:id" element={<BuyPage />} />
+          <Route path="/buy" element={<BuyPage />} />
           <Route path="/payment/:id" element={<Payment />} />
-          <Route path="/profile" element={<ProfilePage/>} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
 
       </div>

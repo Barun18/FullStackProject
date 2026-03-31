@@ -93,7 +93,8 @@ function Navbar({ user, loadUser}: any) {
               Profile
             </button>
 
-            <button className="w-full text-left px-4 py-2 hover:bg-gray-700">
+            <button className="w-full text-left px-4 py-2 hover:bg-gray-700"
+            onClick={() => navigate(`/profile?tab=orders`)}>
               Orders
             </button>
 

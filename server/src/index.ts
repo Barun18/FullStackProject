@@ -114,7 +114,7 @@ app.get("/signup", function (req, res) {
 
 app.post("/signup", async (req, res) => {
   try {
-    let { username, email, password, age } = req.body;
+    let { username, email, password, age, address, phone, city, state, pincode } = req.body;
 
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
@@ -123,7 +123,12 @@ app.post("/signup", async (req, res) => {
         username,
         email,
         password: hash,
-        age: Number(age)
+        age: Number(age),
+        phone,
+        address,
+        city,
+        state, 
+        pincode,
       },
     });
 
@@ -443,8 +448,7 @@ app.get("/orders", async (req, res) => {
     include: {
       items: {
         include: {
-          product:
-            true,
+          product: true,
         },
       },
     },
@@ -453,29 +457,80 @@ app.get("/orders", async (req, res) => {
   res.json(orders);
 })
 
+
 app.post("/order", async (req, res) => {
-  const user = await getUserFromToken(req);
-  if (!user) return res.status(401).json({});
+  try {
+    const user = await getUserFromToken(req);
+    if (!user) return res.status(401).json({});
 
-  const { items } = req.body;
-  const total = items.reduce(
-    (sum: number, item: any) => sum + item.price * item.quantity,
-    0
-  );
+    const { items } = req.body;
 
-  const order = await prisma.order.create({
-    data: {
-      userId: user.id,
-      total,
-      status: "pending",
-      items: {
-        create: items,
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: "No items provided" });
+    }
+
+    //  Fetch products
+    const productIds = items.map((i: any) => i.productId);
+
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } }
+    });
+
+    //  Calculate total
+    let total = 0;
+
+    const orderItemsData = items.map((item: any) => {
+      const product = products.find(p => p.id === item.productId);
+
+      if (!product) throw new Error("Product not found");
+
+      total += product.price * item.quantity;
+
+      return {
+        productId: item.productId,
+        quantity: item.quantity,
+        price: product.price,
+      };
+    });
+
+    //  Create order
+    const order = await prisma.order.create({
+      data: {
+        userId: user.id,
+        total,
+        status: "pending",
+        items: {
+          create: orderItemsData
+        }
       },
-    },
-    include: { items: true },
-  });
-  res.json(order);
+      include: {
+        items: {
+          include: { product: true }
+        }
+      }
+    });
+
+    //  CLEAR CART (FIXED)
+    await prisma.cartItem.deleteMany({
+      where: {
+        cart: {
+          userId: user.id
+        }
+      }
+    });
+
+    res.json(order);
+
+  } catch (err: any) {
+    console.error("ORDER ERROR:", err.message);
+    res.status(500).json({ message: err.message });
+  }
 });
+
+
+
+
+
 
 
 

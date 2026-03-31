@@ -54,6 +54,11 @@ function CreatedAccount() {
                 <input className="border-b-amber-200" name="username" onChange={handleChange} placeholder="username" />
                 <input name="email" onChange={handleChange} placeholder="user email" />
                 <input name="password" onChange={handleChange} placeholder="password" />
+                <input name="phone" onChange={handleChange} placeholder="phone" />
+                <input name="address" onChange={handleChange} placeholder="address" />
+                <input name="city" onChange={handleChange} placeholder="city" />
+                <input name="state" onChange={handleChange} placeholder="state" />
+                <input name="pincode" onChange={handleChange} placeholder="pincode" />
                 <input name="age" onChange={handleChange} placeholder="age" />
                 <button className="bg-blue-700" type="submit">Sign Up</button>
             </form>
