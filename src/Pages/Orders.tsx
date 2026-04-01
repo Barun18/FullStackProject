@@ -24,7 +24,6 @@ function Orders() {
       <div key={order.id} className="border p-3 rounded">
 
         <p><strong>Order ID:</strong> {order.id}</p>
-        <p><strong>Total:</strong> ₹{order.total}</p>
         <p><strong>Status:</strong> {order.status}</p>
 
         <div className="mt-2">
@@ -40,7 +39,9 @@ function Orders() {
 
               <div>
                 <p>{item.product?.title}</p>
-                <p>₹{item.product?.price} * {item.quantity}</p>
+                <p>Price:₹{item.product?.price}</p>
+                <p>Quantity: {item.quantity}</p>
+                <p><strong>Total Price:</strong> ₹{order.total}</p>
               </div>
 
             </div>

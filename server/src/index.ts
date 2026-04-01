@@ -531,9 +531,6 @@ app.post("/order", async (req, res) => {
 
 
 
-
-
-
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+app.listen(process.env.PORT || 5000, () => {
+  console.log("Server running ");
 });
