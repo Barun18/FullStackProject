@@ -46,11 +46,11 @@ function App() {
 
           <Route path="/" element={<Home user={user} />} />
           <Route path="/search" element={<SearchProduct />} />
-          <Route path="/AddProduct" element={<AddProduct />} />
+          <Route path="/addProduct" element={<AddProduct />} />
           {/* <Route path="/AddProduct/:id" element={<AddProduct />} /> */}
-          <Route path="/AdminPage" element={<AdminPage />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="/cart" element={<Cart user={user}/>} />
-          <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/product/:id" element={<ProductDetails user={user}/>} />
           <Route path="/group/:groupName" element={<GroupProduct />} />
           <Route path="/signup" element={<CreatedAccount />} />
           <Route path="/signin" element={<SignIn loadUser={loadUser} />} />

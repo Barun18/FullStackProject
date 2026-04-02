@@ -1,26 +1,29 @@
+import { useRef } from "react";
 import { useParams } from "react-router-dom";
 import { getSingleProduct } from '../services/Api';
 import "../Css/ProductDetails.css"
 import { useEffect, useState } from "react";
 
-function ProductDetails() {
+type Props = {
+   user: any;
+}
+
+function ProductDetails({ user }: Props) {
 
    const { id } = useParams();
+   const hasAlerted = useRef(false);
    const [item, setItem] = useState<any>(null);
-
    const [review, setReview] = useState<any[]>([]);
-   const [name, setName] = useState("");
    const [rating, setRating] = useState(0);
    const [comment, setComment] = useState("");
-   //const [image, setImage] = useState<string | undefined>(undefined);
+   const [file, setFile] = useState<File | null>(null);
 
-
-   // const productReviews = reviews.filter(
-   //    (r) => r.productId === Number(id))
 
    useEffect(() => {
-      if (!id) return;
-
+      if (!user && !hasAlerted.current ) {
+         alert("Please login first");
+         hasAlerted.current = true;
+      }
       const fetchProduct = async () => {
          try {
             const data = await getSingleProduct(Number(id));
@@ -29,7 +32,7 @@ function ProductDetails() {
             const res = await fetch(`http://localhost:5000/reviews/${id}`);
             console.log(res);
             const reviewData = await res.json();
-            setReview(reviewData); 
+            setReview(reviewData);
 
          } catch (err) {
             console.error("Error fetching product:", err);
@@ -38,53 +41,40 @@ function ProductDetails() {
       if (id) {
          fetchProduct();
       }
-   }, [id])
+   }, [id,user])
 
    const handleSubmit = async () => {
       try {
-         const res = await fetch("http://localhost:5000/review",{
-            method:"POST",
-            headers: {
-               "content-type":"application/json",
-            },
-            body: JSON.stringify({
-               productId: Number(id),
-               userId: 18,
-               rating: Number(rating), 
-               comment,
-            }),
-         });
-         const text = await res.text();
-         console.log("Raw Response:", text);
-         let newReview;
-         try{
-            newReview = JSON.parse(text);
-
-         }catch{
-            console.error("Backend did not return JSON");
+         if (!user) {
+            alert("please login first");
             return;
          }
+         const formData = new FormData();
+         formData.append("productId", String(id))
+         formData.append("rating", rating.toString());
+         formData.append("comment", comment);
+         if (file) {
+            formData.append("image", file);
+         }
 
-         setReview((prev) =>[...prev, newReview]);
+         const res = await fetch("http://localhost:5000/review", {
+            method: "POST",
+            credentials: "include",
+            body: formData,
+         });
+         const data = await res.json();
 
-         setName("");
+         setReview((prev) => [...prev, data]);
+
          setRating(0);
          setComment("");
+         setFile(null);
 
-      }catch(err){
+      } catch (err) {
          console.log(err);
       }
    };
 
-   // const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-   //    const file = e.target.files?.[0];
-   //    if (!file) return;
-   //    const reader = new FileReader();
-   //    reader.onloadend = () => {
-   //       setImage(reader.result as string);
-   //    };
-   //    reader.readAsDataURL(file);
-   // };
 
    if (!item) return <div>Loading...</div>
 
@@ -97,12 +87,6 @@ function ProductDetails() {
                   src={item.img} alt={item.title} width={200} />
                <h2>{item.title}</h2>
                <h2>₹{item.price}</h2>
-
-               {/* <button
-                  className="cardAbout"
-                  onClick={() => addToCart(item)}>
-                  Add to Cart
-               </button> */}
 
             </div>
             <div className="product-details">
@@ -132,12 +116,6 @@ function ProductDetails() {
 
          <div className="review-form flex gap-4">
             <input
-               className="bg-emerald-600 px-5 bold"
-               placeholder="Your name"
-               value={name}
-               onChange={(e) => setName(e.target.value)}
-            />
-            <input
                className="bg-emerald-600 px-5"
                type="number"
                placeholder="Rating (1-5)"
@@ -150,11 +128,16 @@ function ProductDetails() {
                value={comment}
                onChange={(e) => setComment(e.target.value)}
             />
-            {/* <input
+            <input
                className="bg-emerald-600 px-5 bold"
                type="file"
                accept="image/*"
-               onChange={handleImage} /> */}
+               onChange={(e) => {
+                  if (e.target.files) {
+                     setFile(e.target.files[0])
+                  }
+               }
+               } />
 
             <button
                className="bg-green-900 bold m-1.5 px-3"
@@ -169,31 +152,15 @@ function ProductDetails() {
                <div
                   className="text-red-700 border-b pb-3 mb-3"
                   key={r.id}>
-                  
+
                   <p>Rating:{r.rating}</p>
                   <p>Review:{r.comment}</p>
-                  {/* {r.image && (
+                  {r.image && (
                      <img src={r.image} width={50} alt="review" />
-                  )} */}
-
+                  )}
                </div>
             ))
          }
-
-         {/* <img src={item.img} width="200" />
-         <h2>{item.title}</h2>
-         <p>Price:{item.price}</p> */}
-
-
-         {/* <div>
-            {
-               Object.entries(item.details as Record<string, any>).map(([key, value]) => (
-                  <p key={key}>
-                     {key}:{value}
-                  </p>
-               ))
-            }
-         </div> */}
 
       </div>)
 }

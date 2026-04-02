@@ -1,3 +1,5 @@
+import "dotenv/config";
+import upload from "./middleware/upload.js"
 import express from "express";
 const app = express();
 import cors from "cors";
@@ -15,8 +17,6 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// app.set("view engine", "ejs");
-// app.set("views", path.join(__dirname, "views"));
 
 //! Middleware
 app.use(cors({
@@ -85,19 +85,27 @@ app.get("/reviews/:productId", async (req, res) => {
 });
 
 // POST review
-app.post("/review", async (req, res) => {
+app.post("/review", upload.single("image"), async (req, res) => {
   try {
-    console.log("BODY:", req.body);
+    const user = await getUserFromToken(req);
+    if (!user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    console.log("BODY", req.body);
+    console.log("FILE", req.file);
 
     const review = await prisma.review.create({
       data: {
         productId: Number(req.body.productId),
-        userId: Number(req.body.userId),
+        userId: user.id,
         rating: Number(req.body.rating),
         comment: req.body.comment,
+        image: req.file?.path || null,
       }
     });
+
     res.json(review);
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to create review " });
@@ -127,7 +135,7 @@ app.post("/signup", async (req, res) => {
         phone,
         address,
         city,
-        state, 
+        state,
         pincode,
       },
     });

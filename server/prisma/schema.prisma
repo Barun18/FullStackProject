@@ -71,17 +71,21 @@ model Product {
   cartItems  CartItem[]
   orderItems OrderItem[]
   category   Category    @relation(fields: [categoryId], references: [id])
+
+  reviews Review[]
 }
 
 model Review {
   id        Int      @id @default(autoincrement())
   rating    Float
   comment   String?
+  image     String?
   productId Int
   userId    Int
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
 }
 
 model User {
@@ -90,12 +94,13 @@ model User {
   username String
   password String
   age      Int
+
   address  String?
   city     String?
   phone    String?
   pincode  String?
   state    String?
 
-  review Review[]
+  reviews Review[]
   orders Order[]
 }
