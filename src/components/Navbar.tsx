@@ -6,7 +6,7 @@ import { useCartStore } from "../store/useCartStore";
 import { FaUserCircle } from 'react-icons/fa';
 
 
-function Navbar({ user, loadUser}: any) {
+function Navbar({ user, loadUser }: any) {
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,8 +21,8 @@ function Navbar({ user, loadUser}: any) {
 
   //  fetch cart once when app loads
   useEffect(() => {
-    if(user)
-    fetchCart();
+    if (user)
+      fetchCart();
   }, [user]);
 
   //  search logic (unchanged)
@@ -40,7 +40,10 @@ function Navbar({ user, loadUser}: any) {
   return (
     <div className="flex justify-between items-center p-4 bg-gray-800 text-white">
 
-      <button onClick={() => navigate("/")}>
+      <button 
+      className="bg-blue-500 px-2 py-1 mt-2 rounded-e-full"
+      onClick={() => navigate("/")}
+      >
         Home
       </button>
 
@@ -75,9 +78,9 @@ function Navbar({ user, loadUser}: any) {
       <button onClick={() => navigate("/cart")}>
         🛒 {totalQty}
       </button>
-
+      { user ? (
       <div className="relative"
-      onMouseLeave={() => setOpen(false)}>
+        onMouseLeave={() => setOpen(false)}>
         <div
           onClick={() => setOpen(!open)}
           className="w-8 h-8 bg-gray-400 rounded-full flex items-center">
@@ -88,37 +91,41 @@ function Navbar({ user, loadUser}: any) {
           bg-gray-800 text-white border border-gray-600
           rounded-lg shadow-lg z-50 flex flex-col">
             <button className="w-full text-left px-4 py-2 hover:bg-gray-700"
-            onClick={() => navigate(`/profile`)}
+              onClick={() => navigate(`/profile`)}
             >
               Profile
             </button>
 
             <button className="w-full text-left px-4 py-2 hover:bg-gray-700"
-            onClick={() => navigate(`/profile?tab=orders`)}>
+              onClick={() => navigate(`/profile?tab=orders`)}>
               Orders
             </button>
 
             <button className="w-full text-left px-4 py-2 hover:bg-gray-700"
-            onClick={async () => {
-              if(user) {
-                await fetch("http://localhost:5000/signout",{
-                  method: "POST",
-                  credentials: "include",
-                });
-                loadUser(null);
-                useCartStore.getState().clearCart();
-
-                navigate("/signin");
-              }else{
-                navigate("/signin");
-                
-              }
-            }}>
+              onClick={async () => {
+                if (user) {
+                  await fetch("http://localhost:5000/signout", {
+                    method: "POST",
+                    credentials: "include",
+                  });
+                  loadUser(null);
+                  useCartStore.getState().clearCart();
+                  navigate("/signin");
+                } else {
+                  navigate("/signin");
+                }
+              }}>
               {user ? "signout" : "signin"}
             </button>
           </div>
         )}
       </div>
+      ):( <button
+        onClick={() => navigate("/signin")}   
+          className="bg-blue-500 px-2 py-1 mt-2 rounded-s-full"
+        >
+          Sign in
+        </button>) }
     </div>
   );
 }

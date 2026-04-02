@@ -150,7 +150,7 @@ function ProductDetails({ user }: Props) {
          {
             review.map((r) => (
                <div
-                  className="text-red-700 border-b pb-3 mb-3"
+                  className="text-orange-800 border-b pb-3 mb-3 bg-sky-100 pl-10"
                   key={r.id}>
 
                   <p>Rating:{r.rating}</p>

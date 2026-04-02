@@ -91,6 +91,7 @@ app.post("/review", upload.single("image"), async (req, res) => {
     if (!user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
+    
     console.log("BODY", req.body);
     console.log("FILE", req.file);
 
