@@ -19,7 +19,7 @@ type CartStore = {
   fetchCart: () => Promise<void>;
   addToCart: (productId: number) => Promise<void>;
   increaseQty: (productId: number) => Promise<void>;
-  decreaseQty: (productId: number) => Promise<void>;
+  decreaseQty: (productId: number, quantity: number) => Promise<void>;
   clearCart: () => void;
 };
 
@@ -68,17 +68,32 @@ export const useCartStore = create<CartStore>((set) => ({
     await useCartStore.getState().fetchCart();
   },
 
-  decreaseQty: async (productId) => {
-    await fetch("http://localhost:5000/cart/decrease", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ productId }),
-    });
+  decreaseQty: async (productId, quantity) => {
+  const { cartItems } = useCartStore.getState();
 
-    await useCartStore.getState().fetchCart();
-  },
+  const item = cartItems.find(
+    (i) => i.productId === productId
+  );
+
+  if (!item) return;
+
+  const url =
+    item.quantity <= 1
+      ? "http://localhost:5000/cart/remove"
+      : "http://localhost:5000/cart/decrease";
+
+      console.log("Calling:", url);
+      
+  await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ productId }),
+  });
+
+  await useCartStore.getState().fetchCart();
+},
   clearCart: () => set({ cartItems: [], totalQty: 0 }),
 }));

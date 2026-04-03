@@ -91,7 +91,7 @@ app.post("/review", upload.single("image"), async (req, res) => {
     if (!user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    
+
     console.log("BODY", req.body);
     console.log("FILE", req.file);
 
@@ -116,28 +116,50 @@ app.post("/review", upload.single("image"), async (req, res) => {
 
 //!:-- From here authentication is started
 
-app.get("/signup", function (req, res) {
+//TODO:-- Creating Zod Schema
+import { z } from "zod";
+import { error } from "console";
+const signupSchema = z.object({
+  username: z.string().trim().min(1, "Username is required").min(3, "Username must be at least 3 characters "),
+  email: z.string().trim().email("Invalid email"),
+  password: z.string().trim().min(6, "Password must be at least 6 characters"),
 
+  age: z.coerce.number(),
+  phone: z.string().trim().min(10).max(12),
+  address: z.string().trim().min(5),
+  city: z.string().trim(),
+  state: z.string().trim(),
+  pincode: z.string().trim().min(5),
+});
+
+app.get("/signup", function (req, res) {
   res.json({ message: "Sign up endpoint ready" });
 })
 
 app.post("/signup", async (req, res) => {
   try {
-    let { username, email, password, age, address, phone, city, state, pincode } = req.body;
+    const result = signupSchema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({
+        errors: result.error.format(),
+      });
+    }
+    const data = result.data;
 
     const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(password, salt);
+    const hash = await bcrypt.hash(data.password, salt);
+
     const user = await prisma.user.create({
       data: {
-        username,
-        email,
+        username: data.username,
+        email: data.email,
         password: hash,
-        age: Number(age),
-        phone,
-        address,
-        city,
-        state,
-        pincode,
+        age: data.age,
+        phone: data.phone,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        pincode: data.pincode,
       },
     });
 
@@ -238,7 +260,6 @@ app.post("/signout", (req, res) => {
   })
   res.json({ message: "Sign out successful" });
 });
-
 
 
 
@@ -430,6 +451,39 @@ app.post("/cart/decrease", async (req, res) => {
   }
 });
 
+
+app.post("/cart/remove", async (req, res) => {
+  try {
+    const user = await getUserFromToken(req);
+    console.log("User:", user)
+    
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+     const cart = await prisma.cart.findFirst({
+      where: {
+        userId: user.id, },
+    });
+    if (!cart){
+      return res.status(404).json({ message: "Cart not found"});
+    }
+    const { productId } = req.body;
+    
+    const deleted = await prisma.cartItem.deleteMany({
+      where: {
+        cartId: cart.id,
+        productId: Number(productId),
+      },
+    }) ;
+
+    console.log("deleted Count", deleted);
+    res.json({ message: "Item removed from cart" })
+  
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error removing item" });
+  }
+})
 
 app.get("/profile", async (req, res) => {
   const user = await getUserFromToken(req);

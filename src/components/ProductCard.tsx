@@ -10,8 +10,18 @@ type Props = {
 };
 
 function ProductCard({ product, user }: Props) {
+
   const addToCart = useCartStore((state) => state.addToCart);
+  const cartItems = useCartStore((state) => state.cartItems);
+  const increaseQty = useCartStore((state) => state.increaseQty);
+  const decreaseQty = useCartStore((state) => state.decreaseQty);
+
   const navigate = useNavigate();
+
+  const cartItem = cartItems.find((item) => (
+    item.productId === product.id));
+
+
 
   const handleBuyNow = () => {
     if (!user) {
@@ -40,12 +50,26 @@ function ProductCard({ product, user }: Props) {
       <p className="text-white">₹{product.price}</p>
 
       <div className="flex gap-3.5">
-        <button
-          onClick={() => addToCart(product.id)}
-          className="bg-blue-500 px-2 py-1 mt-2"
-        >
-          Add to Cart
-        </button>
+        {cartItem ? (
+          <div className="flex items-center gap-2 mt-2">
+            <button onClick={() => decreaseQty(product.id)}
+              className="bg-red-500 px-2">
+              -
+            </button>
+            <span className="text-white">{cartItem.quantity}</span>
+            <button onClick={() => increaseQty(product.id)}
+              className="bg-green-500 px-2">
+              +
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => addToCart(product.id)}
+            className="bg-blue-500 px-2 py-1 mt-2"
+          >
+            Add to Cart
+          </button>
+        )}
         <button
           onClick={handleBuyNow}
           className="bg-blue-500 px-2 py-1 mt-2"

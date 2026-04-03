@@ -12,6 +12,8 @@ function Cart({ user }: Props) {
   const navigate = useNavigate();
 
   const cartItems = useCartStore((state) => state.cartItems);
+  const increaseQty = useCartStore((state) => state.increaseQty);
+  const decreaseQty = useCartStore((state) => state.decreaseQty);
   const fetchCart = useCartStore((state) => state.fetchCart);
   const clearCart = useCartStore((state) => state.clearCart);
 
@@ -26,7 +28,7 @@ function Cart({ user }: Props) {
   if (!user) return <p>Please login to view cart</p>;
 
   if (!cartItems || cartItems.length === 0) {
-    return <p>Your cart is empty</p>;
+    return <p className="px-30 font-bold text-amber-100"> 🛍️ Your Cart is empty 😔</p>;
   }
 
   //  Calculate total
@@ -50,7 +52,7 @@ function Cart({ user }: Props) {
 
   return (
     <div className="p-5">
-      <h2 className="text-xl font-bold mb-4">My Cart</h2>
+      <h2 className="text-xl font-bold mb-4"> 🛍️ My Cart</h2>
 
       <div className="flex flex-col gap-4">
         {cartItems.map((item: any) => (
@@ -67,7 +69,28 @@ function Cart({ user }: Props) {
             <div>
               <p className="font-semibold">{item.product.title}</p>
               <p>₹{item.product.price}</p>
-              <p>Qty: {item.quantity}</p>
+
+              <div className="flex items-center gap-2 mt-1">
+                <button
+                  onClick={() => decreaseQty(item.productId, item.quantity)}
+                  className="bg-red-500 px-2"
+                >
+                  -
+                </button>
+
+                <span>{item.quantity}</span>
+
+                <button
+                  onClick={() => increaseQty(item.productId)}
+                  className="bg-green-500 px-2"
+                >
+                  +
+                </button>
+              </div>
+
+
+
+
               <p>
                 Subtotal: ₹
                 {item.product.price * item.quantity}
